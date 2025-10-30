@@ -17,19 +17,20 @@ def get_numbers(file:str = "numbers.txt"):
             ls[ls.index(i)] = i.split(",")
         return ls
 
-def guess(numbers:list):
-    global guess_corect
+def guess_number(numbers:list, guess:int, win_text:str= "you got it", loose_text:str= "the number was \#"):
+    guess_corect = False
     numbers = numbers
     randnum = random.randint(0, len(numbers)-1)
     number = numbers[randnum][0]
     numbers[randnum].pop(0)
     numbers[randnum].append(number)
-    if int(input("guess a number: ")) == int(number):
-        print("you got it")
+    if guess == int(number):
+        print(win_text.replace("\#", number))
         guess_corect = True
     else:
-        print("the number was "+str(number))
-    return numbers
+        print(loose_text.replace("\#", number))
+    set_numbers(numbers)
+    return guess_corect
 
 def randomize_numbers(colloms:int, rows:int):
     numbers = []
@@ -48,15 +49,26 @@ def scramble_numbers(numbers):
     return numbers
 
 def main():
+    import os
     # variables to change
-    rows = 4
-    collums = 16
+    rows = 16
+    collums = 4
 
     guess_corect = False
     set_numbers(randomize_numbers(collums, rows))
     set_numbers(get_numbers(), "visible.txt")
     set_numbers(scramble_numbers(get_numbers()))
+    tries = 0
+    last_guess = None
     while not guess_corect:
-        set_numbers(guess(get_numbers()))
+        guess = int(input("Guess a number: "))
+        if guess != last_guess:
+            tries += 1
+            guess_corect = guess_number(get_numbers(), guess, "You got it in "+str(tries)+" tries.", "You didn't get it, the number was \#.")
+            last_guess = guess
+        else:
+            print("Your number can not be the same as your last number")
+    os.remove("visible.txt")
+    os.remove("numbers.txt")
 
 main()
